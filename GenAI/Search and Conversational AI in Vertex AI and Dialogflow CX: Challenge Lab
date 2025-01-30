@@ -1,0 +1,201 @@
+Objective
+The objective of this challenge lab is for you to demonstrate proficiency in integrating Search in applications with Vertex AI Agent Builder, showcasing your ability to design and implement a comprehensive solution that combines powerful search capabilities and a virtual assistant to enhance the user experience.
+
+Setup
+Qwiklabs setup
+For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.
+
+Make sure you signed into Qwiklabs using an incognito window.
+
+Note the lab's access time (for example, img/time.png and make sure you can finish in that time block.
+
+There is no pause feature. You can restart if needed, but you have to start at the beginning.
+
+
+When ready, click img/start_lab.png.
+
+Note your lab credentials. You will use them to sign in to the Google Cloud Console. img/open_google_console.png
+
+Click Open Google Console.
+
+Click Use another account and copy/paste credentials for this lab into the prompts.
+
+If you use other credentials, you'll get errors or incur charges.
+
+Accept the terms and skip the recovery resource page.
+Do not click End Lab unless you are finished with the lab or want to restart it. This clears your work and removes the project.
+
+Activate Cloud Shell
+Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources.
+
+In the Cloud Console, in the top right toolbar, click the Activate Cloud Shell button.
+
+Cloud Shell icon
+
+Click Continue.
+
+cloudshell_continue.png
+
+It takes a few moments to provision and connect to the environment. When you are connected, you are already authenticated, and the project is set to your PROJECT_ID. For example:
+
+Cloud Shell Terminal
+
+gcloud is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.
+
+You can list the active account name with this command:
+
+gcloud auth list
+Copied!
+(Output)
+
+Credentialed accounts:
+ - <myaccount>@<mydomain>.com (active)
+(Example output)
+
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+You can list the project ID with this command:
+
+gcloud config list project
+Copied!
+(Output)
+
+[core]
+project = <project_ID>
+(Example output)
+
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+For full documentation of gcloud see the gcloud command-line tool overview.
+Challenge Scenario
+cymbal_shops.png
+
+Here is a company overview as provided on the Cymbal Shops’s website.
+
+Cymbal Shops is an American retail chain headquartered in Minneapolis that sells homeware, electronics, and clothing.
+
+Founded in 1974, Cymbal Shops started out as Cymbal Air, selling AC systems manufactured by Cymbal Group in Minnesota and neighboring states. The company quickly expanded into domestic merchandise in order to satisfy the need for quality products at an affordable price in the midst of a recession.
+
+Cymbal Shops’ broad product assortment was once a benefit - capturing planned purchases and last minute splurges. In recent years, however, the company has struggled to adapt to the acceleration in e-commerce. Digitally native companies are on the rise and Cymbal Shops must implement significant changes in order to keep pace and maintain relevance. Today, Cymbal Shops operates 714 stores across North America and reported $15 billion in revenue in 2019. They currently employ 80,400 employees across the United States and Canada.
+
+Cymbal Shops is a digitally transforming legacy retailer.
+
+It is inspired by clients like: Bed Bath & Beyond, Best Buy, Home Depot, Nordstrom.
+
+Your challenge
+You work as an engineer at Cymbal Shops, a retail chain company renowned for its innovative solutions. Cymbal Shops is embarking on a significant project that involves developing a robust search functionality and virtual agent for a new application. Your task is to design a Proof of Concept (POC) solution to understand the implications and demonstrate the capabilities of integrating Vertex AI Search and Data Store Agent in the application.
+
+Cymbal Shops' new application demands a powerful and efficient search feature, aiming to catalog and retrieve various data types, including text documents, images, and structured data using Vertex AI Search. Additionally, the company aims to create a virtual agent that can assist customers with questions about products and devices available in the Google Store, such as phones, watches, laptops, smart home devices, and other consumer devices. This virtual agent will be built and configured using Vertex AI Conversation.
+
+Your objective is to craft a POC solution that effectively showcases the capabilities of both Vertex AI Search and Data Store Agent within the context of this application, enabling powerful search capabilities and a virtual assistant to enhance the customer experience.
+
+Therefore in this lab, you should:
+
+Create a website search app named App Name 1.
+Create a structured data search app App Name 2.
+Create an unstructured data search app App Name 3.
+Create a generative chat application named Agent Name.
+Enhance customer engagement and optimize performance.
+Task 1. Create a website search app
+In this task, demonstrate how Vertex AI Search can be utilized to create a web search application, showcasing its effectiveness in searching and retrieving content from websites. This app should be capable of crawling web content, indexing it, and providing users with the ability to search for information.
+
+Therefore in this task:
+
+Create an app named App Name 1 of type Search and set the location of the app to Global.
+
+Configure this app to use a datastore named Datastore Name 1 that indexes data from the following website: cloud.google.com/*.
+
+Finally, preview the app and verify if it is working as intended.
+
+Click Check my progress to verify the objectives.
+Create a website search app
+
+
+Task 2. Create a structured data search app
+In this task, showcase how Vertex AI Search can be employed to create a structured data search application, emphasizing its capabilities in handling and searching structured information. The application should allow users to search for specific data points, filter results, and navigate through structured information efficiently.
+
+Therefore in this task:
+
+Create an app named App Name 2 of type Search and set the location of the app to Global.
+
+Configure this app to use a datastore named Datastore Name 2 that ingests data from the file present in the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/kaggle_movies/movie_metadata.ndjson.
+
+Hint: This Cloud Storage bucket contains Newline Delimited JSON-formatted dataset of movies made available by Kaggle.
+Preview the Datastore Name 2 app and configure the search results to only display the following:
+
+Key	Value
+Title	title
+Thumbnail	poster_path
+Text 1	tagline
+Text 2	revenue
+Finally, preview the app and verify if it is working as intended.
+
+Click Check my progress to verify the objectives.
+Create a structured data search app
+
+
+Task 3. Create and preview an unstructured data search app
+In this task, demonstrate how Vertex AI Search can be harnessed to create an unstructured data search application, illustrating its proficiency in searching and presenting unstructured content.
+
+Therefore, in this task,
+
+Create an app named App Name 3 of type Search and set the location of the app to Global.
+
+Configure this app to use a datastore named Datastore Name 3 that ingests unstructured data from the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+
+Finally, preview the app and verify if it is working as intended.
+
+Click Check my progress to verify the objectives.
+Create a unstructured data search app
+
+
+Task 4. Create a generative chat application
+In this task, you should create a Data Store Agent using Vertex AI Conversation. This agent should be able to comprehend unstructured data. Your objective is to configure and deploy a virtual agent that can provide assistance to customers, with a particular focus on handling unstructured information.
+
+Therefore, in this task,
+
+Enable the Dialogflow and Vertex AI Agent Builder APIs.
+
+Navigate to Dialogflow CX, select your project and create a Chat application with the existing agent named Agent Name along with the following configuration:
+
+Key	Property
+Company Name	Company Name
+Configure this application to use a Datastore Name 4 that ingests unstructured data from the folder present in the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+
+Note: It can take up to 10 minutes for your documents to be available and ready for use by your agent while your newly added data is being indexed.
+Test the virtual agent by starting an interactive session with the chatbot to see how it responds to various questions that a customer might ask.
+
+a. Type a greeting to your agent such as Hello.
+
+b. Ask the agent some questions such as.
+
+i. What was the revenue for Google in 2004?
+
+ii. Where does Google see the most potential opportunity for long term growth?
+
+iii. Where is Google allocating the most amount of its capital?
+Copied!
+Note: If your agent is giving you responses from the default negative intent (e.g., "I'm sorry, I didn't get that. Can you rephrase your question?"), then be aware that it can take some time for the agent to be ready for use while your domains, URLs, or documents are being indexed.
+Click Check my progress to verify the objectives.
+Create a generative chat application
+
+
+Task 5. Enhance customer engagement and optimize performance
+In this task, you will set up both voice and chat interactions for your virtual agent, created with Vertex AI Conversation. The objective is to create versatile communication channels that allow customers to engage with your agent through voice commands and text-based chat, delivering a flexible and user-friendly experience. You will further delve into the conversation history and analytics of your Data Store Agent to view and interpret data related to customer interactions, agent responses, and overall performance. Understanding these analytics is essential for optimizing your virtual agent's capabilities and enhancing customer service.
+
+Therefore in this task;
+
+Integrate a phone gateway into your bot named Agent Name for the United States. Name this phone gateway as Phone Gateway Name.
+Note: This bot makes use of the Speech-to-Text and Text-to-Speech capabilities in Google Cloud.
+Embed a chat widget on a website so customers can chat with it in addition to making a phone call to speak with it.
+
+Finally, enable interaction logging for conversation history and analytics to view statistics related to agent requests and responses, and determine where the problems and friction points are in your virtual agent.
+
+Click Check my progress to verify the objectives.
+Enhance customer engagement and optimize performance
+
+
+Congratulations!
+You've successfully integrated Search in applications with Vertex AI Agent Builder.
+
+Your points will be automatically totalled up in the system. You may end this lab now and run it again to try to finish faster which will earn more points in the competition!
