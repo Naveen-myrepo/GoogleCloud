@@ -25,44 +25,49 @@ echo-cluster with green checkmark on the Kubernetes clusters page
 
 To deploy your first version of the application, run the following commands in Cloud Shell to get up and running:
 gcloud container clusters get-credentials echo-cluster --zone=ZONE
-Copied!
 kubectl create deployment echo-web --image=gcr.io/qwiklabs-resources/echo-app:v1
-Copied!
 kubectl expose deployment echo-web --type=LoadBalancer --port 80 --target-port 8000
-Copied!
+
 Your challenge
 You need to update the running echo-app application in the echo-web deployment from the v1 to the v2 code you have been provided. You must also scale out the application to 2 instances and confirm that they are all running.
 
-Task 1. Build and deploy the updated application with a new tag
-The updated sample application, including the Dockerfile and the application context files, are contained in an archive called echo-web-v2.tar.gz. The archive has been copied to a Cloud Storage bucket in your lab project called bucket name. V2 of the application adds a version number to the output of the application. In this task, you will download the archive, build the Docker image, and tag it with the v2 tag.
+# Task 1: Build and Tag the Docker Image
+# Step 1: Download the archive from the Cloud Storage bucket
+gsutil cp gs://<bucket-name>/echo-web-v2.tar.gz .
 
-Task 2. Push the image to the Container Registry
-Your organization uses the Container Registry to host Docker images for deployments, and uses the gcr.io Container Registry hostname for all projects. You must push the updated image to the Container Registry before deploying it.
+# Step 2: Extract the archive
+tar -xzf echo-web-v2.tar.gz
 
-Click Check my progress to verify the objective.
-Check that there is a tagged image in gcr.io for echo-app:v2.
+# Step 3: Build the Docker image
+docker build -t gcr.io/<your-project-id>/echo-app:v2 .
 
+# Step 4: Tag the image
+docker tag gcr.io/<your-project-id>/echo-app:v2 gcr.io/<your-project-id>/echo-app:v2
 
-Task 3. Deploy the updated application to the Kubernetes cluster
-In this task, you will deploy the updated application to the Kubernetes cluster. The deployment should be named echo-web and the application should be exposed on port 80. The application should be accessible from outside the cluster.
+# Task 2: Push the Image to the Container Registry
+# Push the image to gcr.io
+docker push gcr.io/<your-project-id>/echo-app:v2
 
-Click Check my progress to verify the objective.
-Deploy the updated application version (v2) to the Kubernetes cluster.
+# Task 3: Deploy the Updated Application
+# Set credentials for your cluster
+gcloud container clusters get-credentials echo-cluster --zone <ZONE>
 
+# Update the deployment
+kubectl set image deployment/echo-web echo-web=gcr.io/<your-project-id>/echo-app:v2
 
-Task 4. Scale out the application
-In this task, you will need to scale out the application to 2 replicas.
+# Task 4: Scale Out the Application
+# Scale the deployment to 2 replicas
+kubectl scale deployment echo-web --replicas=2
 
-Click Check my progress to verify the objective.
-Scale out the kubernetes application so that it is running 2 replicas.
+# Task 5: Confirm the Application is Running
+# Check the status of the pods
+kubectl get pods -o wide
 
+# Get the external IP of the service
+kubectl get svc
 
-Task 5. Confirm the application is running
-In this task, you will need to confirm that the application is running and responding correctly. You can use the external IP address of the application to test it.
-
-Click Check my progress to verify the objective.
-Verify your deployed application service is responding correctly.
-
+# Use the external IP to test the application
+curl http://<external-ip>
 
 Troubleshooting
 Receiving a 504, Gateway timeout error: This might just indicate that the application hasn't quite initialized yet, but it could also be caused by a mismatch between the default port that is set in the Dockerfile (TCP port 8000) and:
