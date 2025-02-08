@@ -96,106 +96,152 @@ Create a structured data search app App Name 2.
 Create an unstructured data search app App Name 3.
 Create a generative chat application named Agent Name.
 Enhance customer engagement and optimize performance.
-Task 1. Create a website search app
-In this task, demonstrate how Vertex AI Search can be utilized to create a web search application, showcasing its effectiveness in searching and retrieving content from websites. This app should be capable of crawling web content, indexing it, and providing users with the ability to search for information.
 
-Therefore in this task:
+Task 1: Create a Website Search App
+Navigate to Vertex AI Search in the Google Cloud Console:
 
-Create an app named App Name 1 of type Search and set the location of the app to Global.
+Go to the Google Cloud Console.
 
-Configure this app to use a datastore named Datastore Name 1 that indexes data from the following website: cloud.google.com/*.
+Click on the navigation menu and select "Vertex AI Search".
 
-Finally, preview the app and verify if it is working as intended.
+Create the App:
 
-Click Check my progress to verify the objectives.
-Create a website search app
+Click on “Create App”.
 
+Enter "App Name 1" as the app name.
 
-Task 2. Create a structured data search app
-In this task, showcase how Vertex AI Search can be employed to create a structured data search application, emphasizing its capabilities in handling and searching structured information. The application should allow users to search for specific data points, filter results, and navigate through structured information efficiently.
+Choose “Search” as the app type.
 
-Therefore in this task:
+Set the location to "Global".
 
-Create an app named App Name 2 of type Search and set the location of the app to Global.
+Configure the App:
 
-Configure this app to use a datastore named Datastore Name 2 that ingests data from the file present in the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/kaggle_movies/movie_metadata.ndjson.
+Create a datastore by clicking “Create Datastore”.
 
-Hint: This Cloud Storage bucket contains Newline Delimited JSON-formatted dataset of movies made available by Kaggle.
-Preview the Datastore Name 2 app and configure the search results to only display the following:
+Enter "Datastore Name 1" as the datastore name.
 
-Key	Value
-Title	title
-Thumbnail	poster_path
-Text 1	tagline
-Text 2	revenue
-Finally, preview the app and verify if it is working as intended.
+Set the source URL to cloud.google.com/*.
 
-Click Check my progress to verify the objectives.
-Create a structured data search app
+Save the datastore configuration.
 
+Preview the App:
 
-Task 3. Create and preview an unstructured data search app
-In this task, demonstrate how Vertex AI Search can be harnessed to create an unstructured data search application, illustrating its proficiency in searching and presenting unstructured content.
+Go to the app list, find "App Name 1", and click "Preview" to verify if it is working as intended.
 
-Therefore, in this task,
+Task 2: Create a Structured Data Search App
+Create the App:
 
-Create an app named App Name 3 of type Search and set the location of the app to Global.
+Navigate to Vertex AI Search.
 
-Configure this app to use a datastore named Datastore Name 3 that ingests unstructured data from the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+Click on “Create App”.
 
-Finally, preview the app and verify if it is working as intended.
+Enter "App Name 2" as the app name.
 
-Click Check my progress to verify the objectives.
-Create a unstructured data search app
+Choose “Search” as the app type.
 
+Set the location to "Global".
 
-Task 4. Create a generative chat application
-In this task, you should create a Data Store Agent using Vertex AI Conversation. This agent should be able to comprehend unstructured data. Your objective is to configure and deploy a virtual agent that can provide assistance to customers, with a particular focus on handling unstructured information.
+Configure the App:
 
-Therefore, in this task,
+Create a datastore by clicking “Create Datastore”.
 
-Enable the Dialogflow and Vertex AI Agent Builder APIs.
+Enter "Datastore Name 2" as the datastore name.
 
-Navigate to Dialogflow CX, select your project and create a Chat application with the existing agent named Agent Name along with the following configuration:
+Set the source URL to gs://cloud-samples-data/gen-app-builder/search/kaggle_movies/movie_metadata.ndjson.
 
-Key	Property
-Company Name	Company Name
-Configure this application to use a Datastore Name 4 that ingests unstructured data from the folder present in the following Cloud Storage bucket: cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+Save the datastore configuration.
 
-Note: It can take up to 10 minutes for your documents to be available and ready for use by your agent while your newly added data is being indexed.
-Test the virtual agent by starting an interactive session with the chatbot to see how it responds to various questions that a customer might ask.
+Configure Search Results:
 
-a. Type a greeting to your agent such as Hello.
+Go to the "Search Results" configuration.
 
-b. Ask the agent some questions such as.
+Set the fields as follows:
 
-i. What was the revenue for Google in 2004?
+Title: title
 
-ii. Where does Google see the most potential opportunity for long term growth?
+Thumbnail: poster_path
 
-iii. Where is Google allocating the most amount of its capital?
-Copied!
-Note: If your agent is giving you responses from the default negative intent (e.g., "I'm sorry, I didn't get that. Can you rephrase your question?"), then be aware that it can take some time for the agent to be ready for use while your domains, URLs, or documents are being indexed.
-Click Check my progress to verify the objectives.
-Create a generative chat application
+Text 1: tagline
 
+Text 2: revenue
 
-Task 5. Enhance customer engagement and optimize performance
-In this task, you will set up both voice and chat interactions for your virtual agent, created with Vertex AI Conversation. The objective is to create versatile communication channels that allow customers to engage with your agent through voice commands and text-based chat, delivering a flexible and user-friendly experience. You will further delve into the conversation history and analytics of your Data Store Agent to view and interpret data related to customer interactions, agent responses, and overall performance. Understanding these analytics is essential for optimizing your virtual agent's capabilities and enhancing customer service.
+Preview the App:
 
-Therefore in this task;
+Go to the app list, find "App Name 2", and click "Preview" to verify if it is working as intended.
 
-Integrate a phone gateway into your bot named Agent Name for the United States. Name this phone gateway as Phone Gateway Name.
-Note: This bot makes use of the Speech-to-Text and Text-to-Speech capabilities in Google Cloud.
-Embed a chat widget on a website so customers can chat with it in addition to making a phone call to speak with it.
+Task 3: Create and Preview an Unstructured Data Search App
+Create the App:
 
-Finally, enable interaction logging for conversation history and analytics to view statistics related to agent requests and responses, and determine where the problems and friction points are in your virtual agent.
+Navigate to Vertex AI Search.
 
-Click Check my progress to verify the objectives.
-Enhance customer engagement and optimize performance
+Click on “Create App”.
 
+Enter "App Name 3" as the app name.
+
+Choose “Search” as the app type.
+
+Set the location to "Global".
+
+Configure the App:
+
+Create a datastore by clicking “Create Datastore”.
+
+Enter "Datastore Name 3" as the datastore name.
+
+Set the source URL to gs://cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+
+Save the datastore configuration.
+
+Preview the App:
+
+Go to the app list, find "App Name 3", and click "Preview" to verify if it is working as intended.
+
+Task 4: Create a Generative Chat Application
+Enable APIs:
+
+Go to the Google Cloud Console and enable the Dialogflow and Vertex AI Agent Builder APIs.
+
+Create the Chat Application:
+
+Navigate to Dialogflow CX.
+
+Select your project and click “Create Agent”.
+
+Enter "Agent Name" for the agent name.
+
+Enter "Company Name" for the company name.
+
+Create a datastore named "Datastore Name 4" with the source URL gs://cloud-samples-data/gen-app-builder/search/alphabet-investor-pdfs.
+
+Configure the agent to use this datastore.
+
+Test the Virtual Agent:
+
+In Dialogflow CX, start an interactive session with the chatbot.
+
+Type a greeting (e.g., “Hello”) and ask questions to test the responses.
+
+Task 5: Enhance Customer Engagement and Optimize Performance
+Integrate a Phone Gateway:
+
+In Dialogflow CX, navigate to the phone gateway settings.
+
+Create a phone gateway named "Phone Gateway Name" for the United States.
+
+Embed a Chat Widget:
+
+Add the following HTML snippet to your website to embed the chat widget:
+
+html
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger-cx/bootstrap.js?v=1"></script>
+<df-messenger
+  chat-title="Chat with us"
+  agent-id="<YOUR_AGENT_ID>"
+  language-code="en"
+></df-messenger>
+Enable Interaction Logging:
+
+In Dialogflow CX, enable interaction logging to view conversation history and analytics.
 
 Congratulations!
 You've successfully integrated Search in applications with Vertex AI Agent Builder.
-
-Your points will be automatically totalled up in the system. You may end this lab now and run it again to try to finish faster which will earn more points in the competition!
