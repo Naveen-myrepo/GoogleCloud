@@ -26,72 +26,87 @@ As part of this challenge, you will need to create the following:
 
 A VPC network with two subnetworks and firewalls need to be created to connect new resources together.
 Launch two VMs in each subnet and verify that these machines can successfully communicate with each other using the protocols you've configured.
-Task 1. Create networks
-Create a VPC network with two subnets and firewalls to open connections between resources.
+Certainly! Here is a step-by-step code script for each of your tasks using Google Cloud SDK's `gcloud` command-line tool:
 
-Create a VPC network named network name with two subnets: subnet a name and subnet b name. Use a Regional dynamic routing mode.
+### Task 1: Create Networks
 
-For subnet a name set the region to network region 1.
+# Step 1: Create a VPC network
+gcloud compute networks create network-name --subnet-mode=custom --bgp-routing-mode=regional
 
-Set the IP stack type to IPv4 (single-stack)
-Set IPv4 range to 10.10.10.0/24
-For subnet b name set the region to network region 2.
+# Step 2: Create Subnet A
+gcloud compute networks subnets create subnet-a-name \
+    --network=network-name \
+    --region=network-region-1 \
+    --range=10.10.10.0/24 \
+    --stack-type=IPV4_ONLY
 
-Set the IP stack type to IPv4 (single-stack)
-Set IPv4 range to 10.10.20.0/24
-Task 2. Add firewall rules
-On this network your team will need to be able to connect to Linux and Windows machines using SSH and RDP, as well as diagnose network communication issues via ICMP.
+# Step 3: Create Subnet B
+gcloud compute networks subnets create subnet-b-name \
+    --network=network-name \
+    --region=network-region-2 \
+    --range=10.10.20.0/24 \
+    --stack-type=IPV4_ONLY
 
-Create a firewall rule named firewall rule 1.
+### Task 2: Add Firewall Rules
 
-For the network, use network name.
-Set the priority to 1000, the traffic to Ingress and action to Allow
-The targets should be set to all instances in the network and the IPv4 ranges to 0.0.0.0/0
-Set the Protocol to TCP and port to 22
-Create a firewall rule named firewall rule 2.
+# Step 1: Firewall rule for SSH
+gcloud compute firewall-rules create firewall-rule-1 \
+    --network=network-name \
+    --priority=1000 \
+    --direction=INGRESS \
+    --action=ALLOW \
+    --rules=tcp:22 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=allow-ssh
 
-For the network, use network name.
-Set the priority to 65535, the traffic to Ingress and action to Allow
-The targets should be set to all instances in the network and the IPv4 ranges to 0.0.0.0/24
-Set the Protocol to TCP and port to 3389
-Create a firewall rule named firewall rule 3.
+# Step 2: Firewall rule for RDP
+gcloud compute firewall-rules create firewall-rule-2 \
+    --network=network-name \
+    --priority=65535 \
+    --direction=INGRESS \
+    --action=ALLOW \
+    --rules=tcp:3389 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=allow-rdp
 
-For the network, use network name.
-Set the priority to 1000, the traffic to Ingress and action to Allow
-The targets should be set to all instances in the network and the IPv4 ranges to 10.10.10.0/24 and 10.10.20.0/24
-Set the Protocol to icmp
-Click Check my progress to verify the objective.
-Create network, subnetworks and firewalls.
+# Step 3: Firewall rule for ICMP
+gcloud compute firewall-rules create firewall-rule-3 \
+    --network=network-name \
+    --priority=1000 \
+    --direction=INGRESS \
+    --action=ALLOW \
+    --rules=icmp \
+    --source-ranges=10.10.10.0/24,10.10.20.0/24 \
+    --target-tags=allow-icmp
 
+### Task 3: Add VMs to Your Network
 
-Task 3. Add VMs to your network
-Create a virtual machine in each subnet, and confirm that the machines can communicate with each other using a protocol that you already set up. Each machine will use network tags that the firewall rules need to allow network traffic.
+# Step 1: Create VM in Subnet A
+gcloud compute instances create us-test-01 \
+    --zone=ZONE1 \
+    --subnet=subnet-a-name \
+    --tags=allow-ssh,allow-icmp
 
-Create an instance name us-test-01 in subnet a name and set the zone to ZONE.
+# Step 2: Create VM in Subnet B
+gcloud compute instances create us-test-02 \
+    --zone=ZONE2 \
+    --subnet=subnet-b-name \
+    --tags=allow-ssh,allow-icmp
 
-Create an instance name us-test-02 in subnet b name and set the zone to ZONE.
+### Verify Connectivity
 
-Verify you can connect your VM.
-Now do a few exercises to test the connection to your VMs.
+To verify the connectivity using SSH and ICMP, follow these commands in the SSH terminal:
 
-Switch back to the Console and navigate to Compute Engine.
+# SSH into us-test-01 VM
+gcloud compute ssh us-test-01 --zone=ZONE1
 
-Click the SSH button corresponding to the us-test-01. This opens an SSH connection to the instance in a new window.
-
-In the SSH window of us-test-01, type the following command to use an ICMP echo against us-test-02, adding the Internal IP address for the VM in-line:
-
+# Inside the SSH session, ping us-test-02 VM
 ping -c 3 <us-test-02-internal-ip-address>
-Copied!
-Use ping to measure latency
-Use ping to measure the latency between instances between all the regions.
 
-To observe the latency, run the following command after opening an SSH window on the us-test-01:
+
+To observe latency between instances:
 
 ping -c 3 us-test-02.ZONE
-Copied!
-Click Check my progress to verify the objective.
-
-Create two instances in specified zones for Traceroute and performance testing.
 
 Congratulations!
 In this challenge lab you have shown that you know how to create a network, add subnets and virtual machines, and confirmed that the VMs can communicate with each other.
