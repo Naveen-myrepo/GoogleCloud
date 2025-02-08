@@ -46,55 +46,85 @@ The media upload function is a critical part of the service, and it is vital tha
 
 Your tasks today will use Cloud Operations tools to improve the company's ability to identify such changes and respond to them rapidly. Your manager has told you that the company is concerned that recent changes in end user behavior, combined with a new generation of phones and tablets, is fuelling a demand for much higher media such as 4K, and even 8K, video. Storage for the data is a relatively minor concern but the company wants to make sure that resource consumption by the Cloud Functions used for media upload and transcoding do not run into any limits or result in unexpected spikes in billing costs.
 
-Task 1. Configure Cloud Monitoring
-Your first task is to enable Cloud Monitoring for your project.
-A basic Cloud Monitoring dashboard, called Media_Dashboard, will be made available to you automatically, but you have to enable Cloud Monitoring in your project before you will be able to access this dashboard.
+Sure, I can provide a general guide for each of the tasks. Here’s an overview of what you need to do:
 
-Click Check my progress to verify the objective.
-Check that Cloud Monitoring is enabled.
+Task 1: Configure Cloud Monitoring
+
+1. Enable the Cloud Monitoring API for your project.
+2. Navigate to the Cloud Monitoring dashboard in the Google Cloud Console.
+
+Task 2: Configure a Compute Instance to generate Custom Cloud Monitoring metrics
+
+1. Edit the startup script of the `video-queue-monitor` Compute Instance.
+2. Make sure the Go application installed in `/work/go` is correctly configured to create and write to custom metrics.
+3. Restart the Compute Instance to apply the changes.
+
+Task 3: Create a custom metric using Cloud Operations logging events
+
+1. Use the Cloud Operations logs to create a custom metric.
+2. Search for log entries that contain `"file_format: 4K"` or `"file_format: 8K"` in the `textPayload` field.
+3. Create a custom log-based metric to monitor the rate at which high resolution video files are uploaded.
+
+Task 4: Add custom metrics to the Media Dashboard in Cloud Operations Monitoring
+
+1. Add a chart for the `input_queue_size` custom metric to the Media_Dashboard.
+2. Add a chart for the high resolution video upload rate custom log-based metric to the Media_Dashboard.
+
+Task 5: Create a Cloud Operations alert based on the rate of high resolution video file uploads
+
+1. Create a custom alert using the high resolution video upload metric.
+2. Configure the alert to trigger when the upload rate exceeds a specified threshold.
+
+Below is an example code snippet to accomplish these tasks:
+
+Task 1: Enable Cloud Monitoring
+
+gcloud services enable monitoring.googleapis.com
+
+Task 2: Startup script for Compute Instance
+
+Edit the metadata for your Compute Instance to include the startup script:
+
+gcloud compute instances add-metadata video-queue-monitor \
+--metadata startup-script='#!/bin/bash
+# Install Cloud Monitoring agent
+curl -sSO https://dl.google.com/cloudagents/add-monitoring-agent-repo.sh
+sudo bash add-monitoring-agent-repo.sh
+sudo apt-get update
+sudo apt-get install stackdriver-agent
+# Install and start Go application
+cd /work/go
+./start.sh
 
 
-Once you initialize Cloud Monitoring, you can access the initial dashboard, called Media_Dashboard. In subsequent tasks you will add custom metrics to this basic dashboard. The initial dashboard configuration incldues some charts that display stats about the latency of the video upload Cloud Function.
+Task 3: Create a custom metric using Cloud Operations logging events
 
-Task 2. Configure a Compute Instance to generate Custom Cloud Monitoring metrics
-Your next task is to confirm that the monitoring service that checks the length of the video processing queue is working correctly.
-The monitoring service creates a custom metric, opencensus/my.videoservice.org/measure/input_queue_size, that allows you to monitor the state of the Jooli Inc.'s video processing queue. This custom metric is created and written to by a Go application that runs on a Compute Instance called video-queue-monitor.
+1. Go to Logging > Logs-based metrics in the Google Cloud Console.
+2. Create a new logs-based metric using the advanced filter:
 
-The video-queue-monitor Compute Instance has been deployed for you and uses a startup script to install and launch the input queue monitoring Go application. This application was tested fully in a development environment but the configuration in your Compute Instance has not been finalized. The Go application will not write custom metric data until the application is correctly configured by the startup script.
-
-You must modify the startup script for the video-queue-monitor Compute Instance so that the queue monitoring application (the Go application) can create and write to custom metrics. Once you have updated the startup script you will need to restart the instance.
-The Go application is installed in the /work/go directory in the Compute Instance by the startup script.
-
-You can confirm that the application is working by searching for the metric input_queue_size in the Metrics Explorer in Cloud Monitoring.
-Click Check my progress to verify the objective.
-Check that the video input queue custom metric has been created.
+textPayload=~"file_format\: ([4,8]K).*"
 
 
-Task 3. Create a custom metric using Cloud Operations logging events
-Examine the Cloud Operations logs and create a custom metric that tracks the total volume of uploaded media files to your Cloud Function. The video upload Cloud Function creates a Cloud Operations Logging event that includes metadata about the type of video file the video processing system handles.
+3. Set the metric name to `Custom Metric Name`.
 
-You have been asked to configure a custom log based metric called Custom Metric Name that will monitor the rate at which high resolution video files, those recorded at either 4K or 8K resolution, are uploaded.
+Task 4: Add custom metrics to Media Dashboard
 
-The Cloud Function is already processing this data, and if you search the Cloud Operations logs using the advanced filter mode you will find log entries that contain the string "file_format: 4K" or "file_format: 8K" in the textPayload field whenever the video_processing Cloud Function receives a request to process a high resolution video. You can use that filter to create your custom metric.
-
-Click Check my progress to verify the objective.
-Check that a custom metric using Cloud Operations logging events has been created.
+1. Go to Monitoring > Dashboards in the Google Cloud Console.
+2. Edit the `Media_Dashboard` and add a new chart for `input_queue_size`:
 
 
-Task 4. Add custom metrics to the Media Dashboard in Cloud Operations Monitoring
-You must now add two charts to the Media Dashboard:
+Metric: custom.googleapis.com/opencensus/my.videoservice.org/measure/input_queue_size
 
-Add a chart for the video input queue length custom metric that is generated by the Go application running on the video-queue-monitor Compute Instance.
-Add a chart for the high resolution video upload rate custom log based metric to the Media_Dashboard custom dashboard.
-Click Check my progress to verify the objective.
-Check that two custom metrics have been added to the Media_Dashboard
+3. Add another chart for the high resolution video upload rate custom log-based metric:
 
 
-Task 5. Create a Cloud Operations alert based on the rate of high resolution video file uploads
-Create a custom alert using the high resolution video upload metric that triggers when the upload rate for large videos exceeds a count of Threshold per second.
-Click Check my progress to verify the objective.
-Check that a Custom Alert has been created.
+Metric: logging/user/Custom_Metric_Name
 
+Task 5: Create a Cloud Operations alert
+
+1. Go to Monitoring > Alerting in the Google Cloud Console.
+2. Create a new alert policy using the high resolution video upload metric.
+3. Set the condition to trigger when the upload rate exceeds the specified threshold.
 
 Tips and tricks
 Tip 1. The startup script for the Compute Instance is in the Compute Instance metadata key called startup_script.
