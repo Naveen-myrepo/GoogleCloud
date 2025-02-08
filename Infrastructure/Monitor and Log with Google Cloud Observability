@@ -46,8 +46,6 @@ The media upload function is a critical part of the service, and it is vital tha
 
 Your tasks today will use Cloud Operations tools to improve the company's ability to identify such changes and respond to them rapidly. Your manager has told you that the company is concerned that recent changes in end user behavior, combined with a new generation of phones and tablets, is fuelling a demand for much higher media such as 4K, and even 8K, video. Storage for the data is a relatively minor concern but the company wants to make sure that resource consumption by the Cloud Functions used for media upload and transcoding do not run into any limits or result in unexpected spikes in billing costs.
 
-Sure, I can provide a general guide for each of the tasks. Here’s an overview of what you need to do:
-
 Task 1: Configure Cloud Monitoring
 
 1. Enable the Cloud Monitoring API for your project.
