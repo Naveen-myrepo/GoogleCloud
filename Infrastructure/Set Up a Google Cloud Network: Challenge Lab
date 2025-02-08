@@ -26,7 +26,6 @@ As part of this challenge, you will need to create the following:
 
 A VPC network with two subnetworks and firewalls need to be created to connect new resources together.
 Launch two VMs in each subnet and verify that these machines can successfully communicate with each other using the protocols you've configured.
-Certainly! Here is a step-by-step code script for each of your tasks using Google Cloud SDK's `gcloud` command-line tool:
 
 ### Task 1: Create Networks
 
