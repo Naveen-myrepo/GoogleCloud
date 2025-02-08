@@ -34,12 +34,11 @@ For this project, you will use Terraform to create, deploy, and keep track of in
 In this lab, you will use Terraform to import and create multiple VM instances, a VPC network with two subnetworks, and a firewall rule for the VPC to allow connections between the two instances. You will also create a Cloud Storage bucket to host your remote backend.
 
 Note: At the end of every section, plan and apply your changes to allow your work to be successfully verified. Since we will be updating many terraform files in this lab make sure to use the correct file path and maintain the correct indentation.
-Sure! Here's the code for each of the tasks described:
 
-**Task 1: Create the configuration files**
+Task 1: Create the configuration files
 
 `main.tf`:
-```hcl
+
 terraform {
   required_providers {
     google = {
@@ -58,10 +57,10 @@ provider "google" {
   region  = var.region
   zone    = var.zone
 }
-```
+
 
 `variables.tf`:
-```hcl
+
 variable "project_id" {
   description = "The project ID to deploy to"
 }
@@ -75,10 +74,10 @@ variable "zone" {
   description = "The zone to deploy to"
   default     = "us-central1-a"
 }
-```
+
 
 `modules/instances/instances.tf`:
-```hcl
+
 resource "google_compute_instance" "tf-instance-1" {
   name         = "tf-instance-1"
   machine_type = "e2-standard-2"
@@ -138,10 +137,10 @@ resource "google_compute_instance" "instance-3" {
   EOT
   allow_stopping_for_update = true
 }
-```
+
 
 `modules/instances/outputs.tf`:
-```hcl
+
 output "instance_1_name" {
   value = google_compute_instance.tf-instance-1.name
 }
@@ -153,95 +152,90 @@ output "instance_2_name" {
 output "instance_3_name" {
   value = google_compute_instance.instance-3.name
 }
-```
+
 
 `modules/instances/variables.tf`:
-```hcl
+
 variable "network" {
   description = "The name of the network"
 }
-```
+
 
 `modules/storage/storage.tf`:
-```hcl
+
 resource "google_storage_bucket" "bucket" {
   name                        = "Bucket_Name"
   location                    = "US"
   force_destroy               = true
   uniform_bucket_level_access = true
 }
-```
+
 
 `modules/storage/outputs.tf`:
-```hcl
+
 output "bucket_name" {
   value = google_storage_bucket.bucket.name
 }
-```
+
 
 `modules/storage/variables.tf`:
-```hcl
+
 variable "bucket_name" {
   description = "The name of the bucket"
 }
-```
 
-**Task 2: Import infrastructure**
+
+Task 2: Import infrastructure
 
 In `main.tf` add:
-```hcl
+
 module "instances" {
   source = "./modules/instances"
   network = "default"
 }
-```
 
 In Cloud Shell, initialize Terraform and import instances:
-```shell
+
 terraform init
 terraform import module.instances.google_compute_instance.tf-instance-1 <instance_1_id>
 terraform import module.instances.google_compute_instance.tf-instance-2 <instance_2_id>
-```
 
-**Task 3: Configure a remote backend**
+Task 3: Configure a remote backend
 
 In `main.tf` add:
-```hcl
+
 module "storage" {
   source = "./modules/storage"
 }
-```
+
 
 Initialize and apply changes:
-```shell
+
 terraform init
 terraform apply
-```
 
-**Task 4: Modify and update infrastructure**
+Task 4: Modify and update infrastructure
 
 Edit `modules/instances/instances.tf` to change machine type for `tf-instance-1` and `tf-instance-2`, and add `instance-3`.
 
 Initialize and apply changes:
-```shell
+
 terraform init
 terraform apply
-```
 
-**Task 5: Destroy resources**
+Task 5: Destroy resources
 
 Remove `instance-3` from `modules/instances/instances.tf`.
 
 Initialize and apply changes:
-```shell
+
 terraform init
 terraform apply
-```
 
-**Task 6: Use a module from the Registry**
+
+Task 6: Use a module from the Registry
 
 In `main.tf` add:
-```hcl
 module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "6.0.0"
@@ -263,20 +257,18 @@ module "vpc" {
     },
   ]
 }
-```
 
 Update `modules/instances/instances.tf` to connect instances to the correct subnets.
 
 Initialize and apply changes:
-```shell
+
 terraform init
 terraform apply
-```
 
-**Task 7: Configure a firewall**
+Task 7: Configure a firewall
 
 In `main.tf` add:
-```hcl
+
 resource "google_compute_firewall" "tf-firewall" {
   name    = "tf-firewall"
   network = module.vpc.network_name
@@ -288,13 +280,11 @@ resource "google_compute_firewall" "tf-firewall" {
 
   source_ranges = ["0.0.0.0/0"]
 }
-```
 
 Initialize and apply changes:
-```shell
+
 terraform init
 terraform apply
-```
 
 Congratulations!
 If you managed to import, create, modify, and configure the architecture within the allotted time, you've shown great competency in your Terraform skills! In this lab, you started by importing two pre-configured VMs into Terraform and creating a Cloud Storage bucket to configure your backend. You then added another instance and practiced modifying and updating the resource configurations within your modules. Lastly, you used a module from the Terraform Registry to create a VPC with two subnets, connected the instances to it, and created a firewall rule to allow connections between them.
