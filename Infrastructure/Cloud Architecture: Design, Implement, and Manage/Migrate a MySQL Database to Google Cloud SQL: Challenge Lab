@@ -45,37 +45,46 @@ WordPress Installation and Migration: The WordPress Codex provides information o
 Task 1. Create a new Cloud SQL instance
 In this task, you need to set up a new Cloud SQL instance in Google Cloud. Choose the right configurations and make sure to create the SQL instance in the Zone:ZONE and Region: REGION that will be suitable for hosting the WordPress database. Make sure you understand the requirements for the database to support the WordPress blog.
 
-Click Check my progress to verify the objective.
-Check that there is a Cloud SQL instance.
+gcloud sql instances create wordpress-instance --tier=db-f1-micro --region=REGION
 
+Check that there is a Cloud SQL instance.
 
 Task 2. Configure the new database
 Once you've created the Cloud SQL instance, your next step is to configure the database within it. Set up the necessary database parameters, ensuring it's prepared to receive the existing WordPress database data.
 
-Click Check my progress to verify the objective.
-Check that there is a user database on the Cloud SQL instance.
+gcloud sql databases create wordpress --instance=wordpress-instance
 
+gcloud sql users create blogadmin --host=% --instance=wordpress-instance --password=Password1*
+
+Check that there is a user database on the Cloud SQL instance.
 
 Task 3. Perform a database dump and import the data
 Your task here is to perform a dump of the existing wordpress MySQL database and then import this data into your newly created Cloud SQL database. This step is crucial in migrating the database effectively.
 
-Click Check my progress to verify the objective.
-Check that the blog instance is authorized to access Cloud SQL.
+gcloud compute ssh blog
+mysqldump -u blogadmin -pPassword1* wordpress > /tmp/wordpress.sql
+gcloud sql import sql wordpress-instance gs://YOUR_BUCKET/wordpress.sql --database=wordpress
 
+Check that the blog instance is authorized to access Cloud SQL.
 
 Task 4. Reconfigure the WordPress installation
 Now that the database has been migrated to Cloud SQL, you need to reconfigure the WordPress software to use this new database. This involves editing the wp-config.php file in the WordPress directory to point to the Cloud SQL database, moving away from the local MySQL database.
 
-Click Check my progress to verify the objective.
-Check that wp-config.php points to the Cloud SQL instance.
+nano /var/www/html/wordpress/wp-config.php
 
+define('DB_NAME', 'wordpress');
+define('DB_USER', 'blogadmin');
+define('DB_PASSWORD', 'Password1*');
+define('DB_HOST', 'INSTANCE_CONNECTION_NAME');
+
+Check that wp-config.php points to the Cloud SQL instance.
 
 Task 5. Validate and troubleshoot
 Your final task is to ensure that the WordPress blog is functioning correctly with the new Cloud SQL database. Check if the blog operates as expected and troubleshoot any issues you encounter. This step is important to confirm the success of your database migration and the overall functionality of the blog.
 
-Click Check my progress to verify the objective.
-Check that the blog still responds to requests.
+curl http://EXTERNAL_IP_ADDRESS
 
+Check that the blog still responds to requests.
 
 Congratulations!
 You have migrated a MySQL database to Google Cloud SQL. You successfully migrated the database to Cloud SQL and reconfigured the WordPress software to use the new database. You also validated the functionality of the blog and troubleshooted any issues you encountered.
