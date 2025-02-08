@@ -55,169 +55,149 @@ Rebuild and push image, tag with latest.
 Create new release with latest version.
 Promote the latest release to second cluster.
 Rollback changes to second cluster, modify, and re-release.
-Task 1. Prework - Set up environment, enable APIs and create clusters
-Set up environment variables for your Project ID (this is important as it is used in several of the configuration files below). You can use the commands below:
+
+## Task 1: Prework - Set up environment, enable APIs and create clusters
+# Set up environment variables
 export PROJECT_ID=$(gcloud config get-value project)
 export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-export REGION=
+export REGION=<your-region>
 gcloud config set compute/region $REGION
-Copied!
-Enable the following services in your Google Cloud project using the following commands:
-container.googleapis.com
-clouddeploy.googleapis.com
-artifactregistry.googleapis.com
-cloudbuild.googleapis.com
+
+# Enable the necessary services
 gcloud services enable \
 container.googleapis.com \
 clouddeploy.googleapis.com \
 artifactregistry.googleapis.com \
 cloudbuild.googleapis.com
-Copied!
-Enable permissions for both Kubernetes and Cloud Deploy using the following commands:
+
+# Enable permissions for Kubernetes and Cloud Deploy
 gcloud projects add-iam-policy-binding $PROJECT_ID \
---member=serviceAccount:$(gcloud projects describe $PROJECT_ID \
---format="value(projectNumber)")-compute@developer.gserviceaccount.com \
+--member=serviceAccount:$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")-compute@developer.gserviceaccount.com \
 --role="roles/clouddeploy.jobRunner"
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
---member=serviceAccount:$(gcloud projects describe $PROJECT_ID \
---format="value(projectNumber)")-compute@developer.gserviceaccount.com \
+--member=serviceAccount:$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")-compute@developer.gserviceaccount.com \
 --role="roles/container.developer"
-Copied!
-Create an Artifact Repository
-Create a repository for storing your Docker containers.
 
-Name the repository: cicd-challenge
-
+# Create an Artifact Repository
 gcloud artifacts repositories create cicd-challenge \
 --description="Image registry for tutorial web app" \
 --repository-format=docker \
 --location=$REGION
-Copied!
-Create the Google Kubernetes Engine clusters
-Create two GKE clusters for Staging and Production named cd-staging and cd-production. Clusters should be single zone and single node.
 
-gcloud container clusters create cd-staging --node-locations= --num-nodes=1 --async
-gcloud container clusters create cd-production --node-locations= --num-nodes=1 --async
-Copied!
-Task 2. Build the images and upload to the repository
-Clone the repository for the lab into your home directory using the commands below:
+# Create GKE clusters for staging and production
+gcloud container clusters create cd-staging --zone=<your-zone> --num-nodes=1 --async
+gcloud container clusters create cd-production --zone=<your-zone> --num-nodes=1 --async
+
+## Task 2: Build the images and upload to the repository
+# Clone the repository
 cd ~/
 git clone https://github.com/GoogleCloudPlatform/cloud-deploy-tutorials.git
 cd cloud-deploy-tutorials
 git checkout c3cae80 --quiet
 cd tutorials/base
-Copied!
-Create the skaffold.yaml configuration using the command below:
+
+# Create skaffold.yaml configuration
 envsubst < clouddeploy-config/skaffold.yaml.template > web/skaffold.yaml
 cat web/skaffold.yaml
-Copied!
-The web directory now contains the skaffold.yaml configuration file, which provides instructions for Skaffold to build a container image for your application.
 
-Run the skaffold command to build the application and deploy the container image to the Artifact Registry repository previously created:
-HINT: use the full path to the repository you created earlier
-
+# Build the application and deploy the container image
 cd web
 skaffold build --interactive=false \
---default-repo <INSERT YOUR ARTIFACT REPOSITORY HERE> \
+--default-repo <your-artifact-repository-path> \
 --file-output artifacts.json
 cd ..
-Copied!
-Validate that the container was created and added to the repository
 
-Task 3. Create the Delivery Pipeline
-Run the following commands to copy the pipeline template file:
+## Task 3: Create the Delivery Pipeline
 
-Create the delivery-pipeline resource using the delivery-pipeline.yaml file:
+# Copy the pipeline template file
 cp clouddeploy-config/delivery-pipeline.yaml.template clouddeploy-config/delivery-pipeline.yaml
 sed -i "s/targetId: staging/targetId: cd-staging/" clouddeploy-config/delivery-pipeline.yaml
 sed -i "s/targetId: prod/targetId: cd-production/" clouddeploy-config/delivery-pipeline.yaml
 sed -i "/targetId: test/d" clouddeploy-config/delivery-pipeline.yaml
-Copied!
-Set the deployment region using the deploy/region configuration parameter.
-Apply the pipeline configuration you created above using thef gcloud beta deploy command
-Verify the delivery pipeline was created using the command below:
+
+# Set the deployment region and apply the pipeline configuration
+sed -i "s/region:/region: $REGION/" deploy/region.yaml
+gcloud beta deploy delivery-pipelines apply --file=clouddeploy-config/delivery-pipeline.yaml
+
+# Verify the delivery pipeline was created
 gcloud beta deploy delivery-pipelines describe web-app
-Copied!
-Configure the deployment targets
-Two delivery pipeline targets will be created - one for each of the GKE clusters.
 
-Ensure that the clusters are ready
-The two GKE clusters should now be running but it's useful to verify this.
 
-Get the status of the clusters:
+## Configure the deployment targets
+
+# Verify clusters are ready
 gcloud container clusters list --format="csv(name,status)"
-Copied!
-All clusters should be in the RUNNING state, as indicated in the output below. If they are not yet marked as RUNNING, retry the command above until their status has changed to RUNNING.
 
-Create a context for each cluster
-Use the commands below to get the credentials for each cluster and create an easy-to-use kubectl context for referencing the clusters later:
-CONTEXTS=({INSERT YOUR TARGETS HERE})
+# Create contexts for each cluster
+CONTEXTS=(cd-staging cd-production)
 for CONTEXT in ${CONTEXTS[@]}
 do
     gcloud container clusters get-credentials ${CONTEXT} --region ${REGION}
     kubectl config rename-context gke_${PROJECT_ID}_${REGION}_${CONTEXT} ${CONTEXT}
 done
-Copied!
-Create a namespace in each cluster
-Use the commands below to create a Kubernetes namespace (web-app) in each of the clusters:
+
+# Create a namespace in each cluster
 for CONTEXT in ${CONTEXTS[@]}
 do
     kubectl --context ${CONTEXT} apply -f kubernetes-config/web-app-namespace.yaml
 done
-Copied!
-Create the delivery pipeline targets
-Create a target definition file for each of the targets using the commands below (no changes needed):
+
+# Create the delivery pipeline targets
 envsubst < clouddeploy-config/target-staging.yaml.template > clouddeploy-config/target-cd-staging.yaml
 envsubst < clouddeploy-config/target-prod.yaml.template > clouddeploy-config/target-cd-production.yaml
 
 sed -i "s/staging/cd-staging/" clouddeploy-config/target-cd-staging.yaml
 sed -i "s/prod/cd-production/" clouddeploy-config/target-cd-production.yaml
-Copied!
-Apply the target files to Cloud Deploy.
-The targets are described in a yaml file. Each target configures the relevant cluster information for the target.
 
-Display the details for the staging target:
+# Apply the target files
+gcloud beta deploy apply --file=clouddeploy-config/target-cd-staging.yaml
+gcloud beta deploy apply --file=clouddeploy-config/target-cd-production.yaml
 
-cat clouddeploy-config/target-cd-staging.yaml
-Copied!
-Verify that the Cloud Deploy targets have been created.
 
-Task 4. Create a Release
-Create a release using the gcloud beta deploy releases command and the skaffold and artifacts.json files you created earlier.
-Name the release web-app-001 and use the delivery-pipeline web-app.
-HINT: your source directory should be web/
+## Task 4: Create a Release
 
-Verify that your application has been deployed to the staging environment (cd-staging) via the command below or in the console.
-gcloud beta deploy rollouts list \
---delivery-pipeline web-app \
---release web-app-001
-Copied!
-Cloud Deploy Pipeline
+# Create a release
+gcloud beta deploy releases create web-app-001 --delivery-pipeline web-app --file=skaffold.yaml --source=web
 
-Verify the release to the Staging environment
+# Verify the application deployment to staging
+gcloud beta deploy rollouts list --delivery-pipeline web-app --release web-app-001
 
-Task 5. Promote your application to production
-Promote your application from the Staging (cd-staging) environment to the Production (cd-production) environment.
-HINT: Don't forget to approve the deployment!
+## Task 5: Promote your application to production
 
-Verify the release to the Production environment
+# Promote application to production
+gcloud beta deploy releases promote web-app-001 --to-target cd-production
 
-Task 6. Make a change to the application and redeploy it
-Using the editor, open the cloud-deploy-tutorials/tutorials/base/web/leeroy-app/ directory and modify the app.go file. Change line 24 to say: fmt.Fprintf(w, "leeroooooy app v2!!\n")
-Build the application and push to the Artifact Registry.
-Create a new release on your pipeline you created earlier. Name the release web-app-002
-Verify the new version has been deployed to the staging environment.
-gcloud beta deploy rollouts list \
---delivery-pipeline web-app \
---release web-app-002
-Copied!
-Task 7. Rollback The Change
-Oh No! Your QA Engineers have found a bug in your release to staging so you will need to rollback to the previous version.
+# Approve the deployment
+gcloud beta deploy rollouts approve --delivery-pipeline web-app --release web-app-001 --target cd-production
 
-Use Cloud Deploy to rollback to the original version of the application - web-app-001
-Verify that the original version is running.
-Verify the rollback ran successfully
+
+## Task 6: Make a change to the application and redeploy it
+
+# Modify app.go and build the application
+cd cloud-deploy-tutorials/tutorials/base/web/leeroy-app/
+sed -i 's/fmt.Fprintf(w, "leeroooooy app!!\\n")/fmt.Fprintf(w, "leeroooooy app v2!!\\n")/' app.go
+
+# Build the application and push to the Artifact Registry
+skaffold build --interactive=false --default-repo <your-artifact-repository-path> --file-output artifacts.json
+
+# Create a new release
+gcloud beta deploy releases create web-app-002 --delivery-pipeline web-app --file=skaffold.yaml --source=web
+
+# Verify the new version deployment to staging
+gcloud beta deploy rollouts list --delivery-pipeline web-app --release web-app-002
+
+
+## Task 7: Rollback The Change
+
+# Rollback to the previous version
+gcloud beta deploy rollouts rollback --delivery-pipeline web-app --release web-app-001 --target cd-staging
+
+# Verify the rollback
+gcloud beta deploy rollouts list --delivery-pipeline web-app --release web-app-001
+
+
+Remember to replace placeholders like `<your-region>`, `<your-artifact-repository-path>`, and `<your-zone>` with actual values. 
 
 Congratulations!
 In this lab, you have successfully set up a CI/CD pipeline using Google Cloud Deploy and Artifact Registry. You've created a proof of concept that addressed all of management's requirements. Jooli Inc. is now well on their way towards achieving higher ROI with the benefits of application modernization!
