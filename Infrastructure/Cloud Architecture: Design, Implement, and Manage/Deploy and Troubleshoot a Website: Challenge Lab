@@ -30,27 +30,59 @@ A virtual machine instance on Compute Engine can be controlled like any standard
 
 Task 1. Create a Linux VM instance
 Create a Linux virtual machine, name it Instance name and specify the zone as Compute zone.
+
+gcloud compute instances create instance-name \
+    --zone=compute-zone \
+    --machine-type=e2-micro \
+    --image-family=debian-10 \
+    --image-project=debian-cloud \
+    --tags=http-server,https-server
+
 Task 2. Enable public access to VM instance
 While creating the Linux instance, make sure to apply the appropriate firewall rules so that potential customers can find your new product.
-Click Check my progress to verify the objective.
+gcloud compute firewall-rules create default-allow-http \
+    --direction=INGRESS \
+    --priority=1000 \
+    --network=default \
+    --action=ALLOW \
+    --rules=tcp:80 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=http-server
+
+gcloud compute firewall-rules create default-allow-https \
+    --direction=INGRESS \
+    --priority=1000 \
+    --network=default \
+    --action=ALLOW \
+    --rules=tcp:443 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=https-server
 
 Create a Compute Engine instance, add necessary firewall rules.
 
 Task 3. Running a basic Apache Web Server
 A virtual machine instance on Compute Engine can be controlled like any standard Linux server.
-
 Deploy a simple Apache web server (a placeholder for the new product site) to learn the basics of running a server on a virtual machine instance.
-Click Check my progress to verify the objective.
-
 Add Apache2 HTTP Server to your instance
+
+gcloud compute ssh instance-name --zone=compute-zone
+
+sudo apt update
+sudo apt install apache2 -y
+
+sudo systemctl start apache2
+sudo systemctl enable apache2
 
 Task 4. Test your server
 Test that your instance is serving traffic on its external IP.
 You should see the "Hello World!" page (a placeholder for the new product site).
 
-Click Check my progress to verify the objective.
+Retrieve the external IP address of your instance.
 
-Test your server
+gcloud compute instances describe instance-name --zone=compute-zone \
+    --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+
+Open your web browser and go to http://EXTERNAL_IP. You should see the Apache2 default page or "Hello World!".
 
 Troubleshooting
 Receiving a Connection Refused error:
