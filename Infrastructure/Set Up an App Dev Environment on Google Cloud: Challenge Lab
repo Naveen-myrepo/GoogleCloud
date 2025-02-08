@@ -41,28 +41,27 @@ Naming is normally team-resource, e.g. an instance could be named kraken-webserv
 Allocate cost effective resource sizes. Projects are monitored and excessive resource use will result in the containing project's termination (and possibly yours), so beware. This is the guidance the monitoring team is willing to share; unless directed, use e2-micro for small Linux VMs and e2-medium for Windows or other applications such as Kubernetes nodes.
 Each task is described in detail below, good luck!
 
-Task 1. Create a bucket
-You need to create a bucket called Bucket Name for the storage of the photographs. Ensure the resource is created in the REGION region and ZONE zone.
 
-Click Check my progress to verify the objective.
-Create a bucket called Bucket Name
+### Task 1: Create a Bucket
 
+To create a bucket called `Bucket Name` in a specific region and zone, you can use the following command:
 
-Task 2. Create a Pub/Sub topic
-Create a Pub/Sub topic called Topic Name for the Cloud Run Function to send messages.
-
-Click Check my progress to verify the objective.
-Create a Pub/Sub topic called Topic Name
+gsutil mb -l REGION gs://Bucket-Name
 
 
-Task 3. Create the thumbnail Cloud Run Function
-Create a Cloud Run Function Cloud Run Function Name that will to create a thumbnail from an image added to the Bucket Name bucket. Ensure the Cloud Run Function is using the Cloud Run function environment (which is 2nd generation). Ensure the resource is created in the REGION region and ZONE zone.
+### Task 2: Create a Pub/Sub Topic
 
-Create a Cloud Run Function called Cloud Run Function Name
-Note: The Cloud Run Function is required to executes every time an object is created in the bucket created in Task 1. During the process Cloud Run Function may request permission to enable APIs. Please enable each of the required APIs as requested.
-Make sure you set the Entry point (Function to execute) to Cloud Run Function Name and Trigger to Cloud Storage.
+To create a Pub/Sub topic called `Topic Name`, use the following gcloud command:
 
-Add the following code to the index.js:
+
+gcloud pubsub topics create Topic-Name
+
+
+### Task 3: Create the Thumbnail Cloud Run Function
+
+To create a Cloud Run Function, follow these steps:
+
+1. Create a file named `index.js` with the following content:
 
 const functions = require('@google-cloud/functions-framework');
 const crc32 = require("fast-crc32c");
@@ -81,15 +80,13 @@ functions.cloudEvent('', cloudEvent => {
   const bucketName = event.bucket;
   const size = "64x64"
   const bucket = gcs.bucket(bucketName);
-  const topicName = "";
+  const topicName = "Topic-Name";
   const pubsub = new PubSub();
-  if ( fileName.search("64x64_thumbnail") == -1 ){
-    // doesn't have a thumbnail, get the filename extension
+  if (fileName.search("64x64_thumbnail") == -1) {
     var filename_split = fileName.split('.');
     var filename_ext = filename_split[filename_split.length - 1];
-    var filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length );
-    if (filename_ext.toLowerCase() == 'png' || filename_ext.toLowerCase() == 'jpg'){
-      // only support png and jpg at this point
+    var filename_without_ext = fileName.substring(0, fileName.length - filename_ext.length);
+    if (filename_ext.toLowerCase() == 'png' || filename_ext.toLowerCase() == 'jpg') {
       console.log(`Processing Original: gs://${bucketName}/${fileName}`);
       const gcsObject = bucket.file(fileName);
       let newFilename = filename_without_ext + size + '_thumbnail.' + filename_ext;
@@ -106,21 +103,16 @@ functions.cloudEvent('', cloudEvent => {
           })
           .on("finish", () => {
             console.log(`Success: ${fileName} → ${newFilename}`);
-              // set the content-type
-              gcsNewObject.setMetadata(
-              {
-                contentType: 'image/'+ filename_ext.toLowerCase()
-              }, function(err, apiResponse) {});
-              pubsub
-                .topic(topicName)
-                .publisher()
-                .publish(Buffer.from(newFilename))
-                .then(messageId => {
-                  console.log(`Message ${messageId} published.`);
-                })
-                .catch(err => {
-                  console.error('ERROR:', err);
-                });
+            gcsNewObject.setMetadata({
+              contentType: 'image/' + filename_ext.toLowerCase()
+            }, function (err, apiResponse) { });
+            pubsub.topic(topicName).publisher().publish(Buffer.from(newFilename))
+              .then(messageId => {
+                console.log(`Message ${messageId} published.`);
+              })
+              .catch(err => {
+                console.error('ERROR:', err);
+              });
           });
       });
     }
@@ -132,8 +124,11 @@ functions.cloudEvent('', cloudEvent => {
     console.log(`gs://${bucketName}/${fileName} already has a thumbnail`);
   }
 });
-Copied!
-Add the following code to the package.json:
+
+
+2. Create a file named `package.json` with the following content:
+
+
 {
   "name": "thumbnails",
   "version": "1.0.0",
@@ -148,33 +143,38 @@ Add the following code to the package.json:
     "fast-crc32c": "1.0.4",
     "imagemagick-stream": "4.1.1"
   },
-  "devDependencies": {},
   "engines": {
     "node": ">=4.3.2"
   }
 }
-Copied!
-Verify the thumbnail was successfully created.
-
-Note: If you get a permission denied error stating it may take a few minutes before all necessary permissions are propagated to the Service Agent, wait a few minutes and try again. Ensure you have the relevant roles (Eventarc Service Agent, Eventarc Event Receiver, Service Account Token Creator, and Pub/Sub Publisher) assigned to the correct service accounts.
-Click Check my progress to verify the objective.
-Verify the Cloud Run Function
 
 
-Task 4. Test the Infrastructure
-You must upload one JPG or PNG image into the bucket
+3. Deploy the function:
 
-Upload a PNG or JPG image to Bucket Name bucket.
-Note: Alternatively Download this image https://storage.googleapis.com/cloud-training/gsp315/map.jpg to your machine. Then upload it to the bucket.
-You will see a thumbnail image appear shortly afterwards (use REFRESH in the bucket details).
-Task 5. Remove the previous cloud engineer
-You will see that there are two users defined in the project.
 
-One is your account (Username 1 with the role of Owner).
-The other is the previous cloud engineer (Username 2 with the role of Viewer).
-Remove the previous cloud engineer’s access from the project.
-Click Check my progress to verify the objective.
-Remove the previous cloud engineer
+gcloud functions deploy Cloud-Run-Function-Name \
+  --region=REGION \
+  --runtime=nodejs10 \
+  --trigger-resource=Bucket-Name \
+  --trigger-event=google.storage.object.finalize
 
+
+### Task 4: Test the Infrastructure
+
+To test the infrastructure, upload a PNG or JPG image to the `Bucket-Name` bucket. You can use the following command:
+
+gsutil cp path/to/local/image.png gs://Bucket-Name
+
+
+### Task 5: Remove the Previous Cloud Engineer
+
+To remove the previous cloud engineer from the project, use the following command:
+
+
+gcloud projects remove-iam-policy-binding PROJECT_ID \
+  --member='user:previous-cloud-engineer@example.com' \
+  --role='roles/viewer'
+
+Feel free to adjust the code snippets and commands according to your specific requirements. Good luck with your challenge lab! If you have any questions or need further assistance, just let me know.
 
 Congratulations!
