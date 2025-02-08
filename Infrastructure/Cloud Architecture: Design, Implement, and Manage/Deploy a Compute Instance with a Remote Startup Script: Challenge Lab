@@ -19,14 +19,39 @@ Note: In order to ensure accurate activity tracking you should not modify or cha
 Task 1. Create a storage bucket
 Create a storage bucket
 
+# Replace 'YOUR_BUCKET_NAME' with your actual bucket name
+gsutil mb gs://YOUR_BUCKET_NAME
+
 Task 2. Create a VM instance with a remote startup script
 Create a VM instance with a remote startup script
+
+# Replace 'YOUR_BUCKET_NAME' with your actual bucket name
+gsutil cp gs://spls/gsp301/install-web.sh gs://YOUR_BUCKET_NAME/
+
+# Replace 'YOUR_INSTANCE_NAME' with your instance name
+# Replace 'YOUR_BUCKET_NAME' with your actual bucket name
+# Replace 'ZONE' with the actual zone
+gcloud compute instances create YOUR_INSTANCE_NAME \
+  --zone=ZONE \
+  --metadata startup-script-url=gs://YOUR_BUCKET_NAME/install-web.sh
 
 Task 3. Create a firewall rule to allow traffic (80/tcp)
 Create a firewall rule to allow traffic (80/tcp)
 
+# Replace 'YOUR_FIREWALL_RULE_NAME' with your firewall rule name
+# Replace 'YOUR_NETWORK_NAME' with your network name, if needed
+gcloud compute firewall-rules create YOUR_FIREWALL_RULE_NAME \
+  --network=default \
+  --allow tcp:80
+
 Task 4. Test that the VM is serving web content
 Test that the VM is serving web content
+
+# Replace 'YOUR_INSTANCE_NAME' with your instance name
+# Replace 'ZONE' with the actual zone
+gcloud compute instances describe YOUR_INSTANCE_NAME \
+  --zone=ZONE \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 
 Tips and Tricks
 Configure Instance Metadata. The Running Startup Scripts documentation page explains how Compute Engine instance metadata can be used to configure startup scripts.
