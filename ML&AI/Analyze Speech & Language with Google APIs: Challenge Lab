@@ -1,0 +1,119 @@
+Overview
+In a challenge lab you’re given a scenario and a set of tasks. Instead of following step-by-step instructions, you will use the skills learned from the labs in the course to figure out how to complete the tasks on your own! An automated scoring system (shown on this page) will provide feedback on whether you have completed your tasks correctly.
+
+When you take a challenge lab, you will not be taught new Google Cloud concepts. You are expected to extend your learned skills, like changing default values and reading and researching error messages to fix your own mistakes.
+
+To score 100% you must successfully complete all tasks within the time period!
+
+Setup and requirements
+Before you click the Start Lab button
+Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click Start Lab, shows how long Google Cloud resources will be made available to you.
+
+This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.
+
+To complete this lab, you need:
+
+Access to a standard internet browser (Chrome browser recommended).
+Note: Use an Incognito or private browser window to run this lab. This prevents any conflicts between your personal account and the Student account, which may cause extra charges incurred to your personal account.
+Time to complete the lab---remember, once you start, you cannot pause a lab.
+Note: If you already have your own personal Google Cloud account or project, do not use it for this lab to avoid extra charges to your account.
+Challenge scenario
+You are starting your career as a junior cloud architect. In this role, you have been assigned to work on a team project that requires you to use the Cloud Natural Language API and Cloud Speech API services in Google Cloud.
+
+You are expected to have the skills and knowledge to complete the tasks that follow.
+
+Your challenge
+For this challenge, you are asked to analyze some text and speech using the Cloud Natural Language API and Cloud Speech APIs, respectively. You also need to perform sentiment analysis on a text document using Python.
+
+You need to:
+
+Create an API key
+Make an entity analysis request and call the Natural Language API
+Create a speech analysis request and call the Speech API
+Analyze sentiment with the Natural Language API
+For this challenge lab, a virtual machine (VM) instance named Instance name has been configured for you to complete the tasks.
+
+Each task is described in detail below, good luck!
+
+### Task 1. Create an API key
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Click on the hamburger menu (three horizontal lines) in the top left corner.
+3. Go to APIs & Services > Credentials.
+4. Click "Create credentials" and select "API key".
+5. Copy the API key and save it securely.
+
+### Task 2. Make an entity analysis request and call the Natural Language API
+1. Connect to the VM instance via SSH.
+2. Create a JSON file named `nl_request.json` with the following content:
+
+{
+  "document": {
+    "type": "PLAIN_TEXT",
+    "content": "With approximately 8.2 million people residing in Boston, the capital city of Massachusetts is one of the largest in the United States."
+  },
+  "encodingType": "UTF8"
+}
+
+3. Use the following `curl` command to make the entity analysis request:
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+-d @nl_request.json \
+https://language.googleapis.com/v1/documents:analyzeEntities \
+-o nl_response.json
+
+
+### Task 3. Create a speech analysis request and call the Speech API
+1. Create a JSON file named `speech_request.json` with the following content:
+
+{
+  "config": {
+    "encoding": "FLAC",
+    "languageCode": "en-US"
+  },
+  "audio": {
+    "uri": "gs://cloud-samples-tests/speech/brooklyn.flac"
+  }
+}
+
+2. Use the following `curl` command to make the speech analysis request:
+
+curl -X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+-d @speech_request.json \
+https://speech.googleapis.com/v1/speech:recognize \
+-o speech_response.json
+
+
+### Task 4. Analyze sentiment with the Natural Language API
+1. Download the fictitious movie review samples from Google Cloud Storage:
+
+gsutil cp gs://cloud-samples-tests/natural-language/sentiment-samples.tgz .
+tar -xvzf sentiment-samples.tgz
+
+2. Edit the `sentiment_analysis.py` file with the following content:
+
+from google.cloud import language_v1
+import os
+
+def analyze(movie_review_filename):
+    client = language_v1.LanguageServiceClient()
+    
+    with open(movie_review_filename, 'r') as review_file:
+        content = review_file.read()
+    
+    document = language_v1.Document(content=content, type_=language_v1.Document.Type.PLAIN_TEXT)
+    
+    response = client.analyze_sentiment(request={'document': document})
+    
+    sentiment = response.document_sentiment
+    print(f"Score: {sentiment.score}, Magnitude: {sentiment.magnitude}")
+
+if __name__ == '__main__':
+    analyze('sentiment-samples/bladerunner-pos.txt')
+
+3. Run the sentiment analysis script:
+
+python sentiment_analysis.py
