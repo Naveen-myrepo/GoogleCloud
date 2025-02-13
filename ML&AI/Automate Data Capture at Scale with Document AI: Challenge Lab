@@ -1,0 +1,102 @@
+Overview
+In a challenge lab you’re given a scenario and a set of tasks. Instead of following step-by-step instructions, you will use the skills learned from the labs in the course to figure out how to complete the tasks on your own! An automated scoring system (shown on this page) will provide feedback on whether you have completed your tasks correctly.
+
+When you take a challenge lab, you will not be taught new Google Cloud concepts. You are expected to extend your learned skills, like changing default values and reading and researching error messages to fix your own mistakes.
+
+To score 100% you must successfully complete all tasks within the time period!
+
+This lab is recommended for students enrolled in the Automate Data Capture at Scale with Document AI skill badge course. Are you ready for the challenge?
+
+Challenge scenario
+You are a data engineer at large infrastructure management company and have been assigned to work on a internal project with the financial division of the company. The company has to process an ever increasing mountain of documents that all require individual manual processing for validation and authorization, which is an expensive task that requires a lot of staff. The company plans to leverage Google Cloud tools to automate the process of collecting, categorizing, and verifying documents in an efficient and less labor intensive manner.
+
+Your challenge
+You must create a document processing pipeline that will automatically process documents that are uploaded to Cloud Storage. The pipeline consists of a primary Cloud Run functions that processes new files using a Document AI form processor to extract the data from the document. The function then saves the form data detected in those files to BigQuery.
+
+You are provided with the source code for a Cloud Run functions that will perform the processing, and you are expected to deploy the document processing pipeline as shown in the architecture below, making sure to correctly configure the components for your specific pipeline.
+
+Document AI challenge lab Solution Architecture
+
+### Task 1: Enable the Cloud Document AI API and Copy Lab Source Files
+1. Enable the Cloud Document AI API:
+   - Navigate to the [Google Cloud Console](https://console.cloud.google.com/).
+   - Go to APIs & Services.
+   - Click Enable APIs and Services.
+   - Search for "Cloud Document AI API" and click Enable.
+
+2. Copy the Lab Source Files into Your Cloud Shell:
+   - Open Cloud Shell in the Google Cloud Console.
+   - Enter the following commands:
+
+     mkdir ./document-ai-challenge
+     gsutil -m cp -r gs://spls/gsp367/* ~/document-ai-challenge/
+
+### Task 2: Create a Form Processor
+1. Create the Processor:
+   - Navigate to the [Document AI Console](https://console.cloud.google.com/document-ai).
+   - Click Create Processor.
+   - Fill in the configuration details:
+     - Processor Type:Form Parser
+     - Processor Name:[Your Processor Name]
+     - Region: US
+   - Note down the **PROCESSOR ID** and **PARSER LOCATION**.
+
+### Task 3: Create Google Cloud Resources
+1. Create Input, Output, and Archive Cloud Storage Buckets:
+   - Use the `gsutil` tool to create the buckets with the following commands:
+    
+     gsutil mb -c standard -l REGION -b on gs://input_bucket_name
+     gsutil mb -c standard -l REGION -b on gs://output_bucket_name
+     gsutil mb -c standard -l REGION -b on gs://archive_bucket_name
+  
+
+2. Create a BigQuery Dataset and Table:
+   - Create the Dataset:
+ 
+     bq mk --location=US -d invoice_parser_results
+
+   - **Create the Table with the Provided Schema:**
+
+     bq mk --table invoice_parser_results.doc_ai_extracted_entities ~/document-ai-challenge/scripts/table-schema/doc_ai_extracted_entities.json
+  
+
+### Task 4: Deploy the Document Processing Cloud Run Functions
+1. Navigate to the Scripts Directory:
+
+   cd ~/document-ai-challenge/scripts
+
+2. Assign the Artifact Registry Reader Role:
+   PROJECT_ID=$(gcloud config get-value project)
+   PROJECT_NUMBER=$(gcloud projects list --filter="project_id:$PROJECT_ID" --format='value(project_number)')
+   SERVICE_ACCOUNT=$(gcloud storage service-agent --project=$PROJECT_ID)
+
+   gcloud projects add-iam-policy-binding $PROJECT_ID \
+     --member serviceAccount:$SERVICE_ACCOUNT \
+     --role roles/pubsub.publisher
+
+3.Deploy the Cloud Run Functions:
+   export CLOUD_FUNCTION_LOCATION="REGION"
+   gcloud functions deploy process-invoices \
+     --gen2 \
+     --region=${CLOUD_FUNCTION_LOCATION} \
+     --entry-point=process_invoice \
+     --runtime=python39 \
+     --service-account=${PROJECT_ID}@appspot.gserviceaccount.com \
+     --source=cloud-functions/process-invoices \
+     --timeout=400 \
+     --env-vars-file=cloud-functions/process-invoices/.env.yaml \
+     --trigger-resource=gs://${PROJECT_ID}-input-invoices \
+     --trigger-event=google.storage.object.finalize\
+     --service-account $PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+     --allow-unauthenticated
+
+### Task 5: Test and Validate the End-to-End Solution
+1. Upload Invoices to the Input Cloud Storage Bucket:
+   - Use the `gsutil` command to upload files from the `~/document-ai-challenge/invoices` folder.
+     gsutil cp ~/document-ai-challenge/invoices/* gs://input_bucket_name
+  
+2. Monitor the Progress:
+   - Watch for events and logs in the Cloud Run functions management section.
+
+Congratulations!
+Congratulations! In this lab, you have successfully created a document processing pipeline that automatically processes documents uploaded to Cloud Storage using the Document AI API. You have created a form processor, deployed a Cloud Run functions to process documents, and validated the end-to-end solution by processing a set of invoices.
