@@ -1,0 +1,97 @@
+Overview
+In a challenge lab you’re given a scenario and a set of tasks. Instead of following step-by-step instructions, you will use the skills learned from the labs in the course to figure out how to complete the tasks on your own! An automated scoring system (shown on this page) will provide feedback on whether you have completed your tasks correctly.
+
+When you take a challenge lab, you will not be taught new Google Cloud concepts. You are expected to extend your learned skills, like changing default values and reading and researching error messages to fix your own mistakes.
+
+To score 100% you must successfully complete all tasks within the time period!
+
+This lab is recommended for students enrolled in the Detect Manufacturing Defects using Visual Inspection AI course. Are you ready for the challenge?
+
+Setup and requirements
+Before you click the Start Lab button
+Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click Start Lab, shows how long Google Cloud resources will be made available to you.
+
+This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.
+
+To complete this lab, you need:
+
+Access to a standard internet browser (Chrome browser recommended).
+Note: Use an Incognito or private browser window to run this lab. This prevents any conflicts between your personal account and the Student account, which may cause extra charges incurred to your personal account.
+Time to complete the lab---remember, once you start, you cannot pause a lab.
+Note: If you already have your own personal Google Cloud account or project, do not use it for this lab to avoid extra charges to your account.
+Challenge scenario
+You are part of an international mobile manufacturing organization and tasked with inspecting defects on the surface of the mobile phones that are out from the assembly line. Your manager has asked you to help develop a system that will be used to analyze images taken on the production like to identify defects such as scratches, dents, deformations, etc. using a pre-prepared Google Visual Inspection Cosmetic Inspection model. The Visual Inspection model and solution artifact have been prepared by another member of your team and reside in shared resource project that you have access to.
+
+Your challenge is to deploy the solution artifact and test that it can successfully identify both mobile phones that have cosmetic defects (defective mobile phones) and mobile phones that do not have cosmetic defects (non-defective mobile phones).
+
+Sample defects
+
+Collage of sample defects
+
+You are expected to have the skills and knowledge for these tasks, so don't expect step-by-step guides to be provided.
+
+Your challenge
+A number of sample images of mobile phones from your company's assembly line have been taken by one of your teammates and stored in a cloud storage bucket. The location of this cloud storage bucket has been shared with you. You have also been provided with a pre-configured Compute Engine virtual machine instance that you must use to deploy and test the pre-prepared Cosmetic Inspection anomaly defection solution artifact. You have also been provided with a script that you must use to process the images by calling Visual Inspection AI rest APIs via the solution artifact container.
+
+This challenge expects you to:
+
+Deploy the exported Cosmetic Inspection anomaly detection solution artifact in the Compute Engine virtual machine instance.
+Identify a defective mobile phone.
+Identify a non-defective mobile phone.
+
+Task 1: Deploy the Exported Cosmetic Inspection Anomaly Detection Solution Artifact
+1.Connect to the VM:
+    - Open your terminal or SSH client and run:
+  
+      gcloud compute ssh VM_Name --zone Zone
+  
+2. Pull the Container from the Registry:
+    - Run the following command to pull the container image from the registry:
+      docker pull gcr.io/ql-shared-resources-test/defect_solution@sha256:776fd8c65304ac017f5b9a986a1b8189695b7abbff6aa0e4ef693c46c7122f4c
+
+3. Run the Container:
+    - Use Docker to run the container, mapping the ports appropriately:
+  
+      docker run -d -p 8601:8601 -p 8602:8602 -p 8603:8603 --name Container_Name gcr.io/ql-shared-resources-test/defect_solution@sha256:776fd8c65304ac017f5b9a986a1b8189695b7abbff6aa0e4ef693c46c7122f4c
+    
+
+4. Verify the Container is Running:
+    - Check if the container is running:
+      docker container ls
+
+Task 2: Prepare Resources to Serve the Exported Assembly Inspection Solution Artifact
+1. Copy the Prediction Script:
+    - Copy the prediction script to your VM:
+
+      gsutil cp gs://cloud-training/gsp895/prediction_script.py .
+   
+
+2. Create a Cloud Storage Bucket:
+    - Create a new Cloud Storage bucket:
+ 
+      gsutil mb gs://Bucket_Name
+    
+3. Copy Test Images to Your Bucket:
+    - Copy the folder containing the test images to your bucket:
+      gsutil cp -r gs://cloud-training/gsp897/cosmetic-test-data gs://Bucket_Name/cosmetic-test-data
+
+Task 3: Identify a Defective Product Image
+1. Run the Prediction Script:
+    - Run the prediction script on the test images to identify a defective product:
+    
+      python3 prediction_script.py --input_image_file /path/to/IMG_0769.png --port 8602 --output_result_file Defective_result_file
+
+2. Check the Results:
+    - Look for annotations with `annotationSpecDisplayName` equal to `scratch` or `dent`.
+
+Task 4: Identify a Non-Defective Product
+1. Run the Prediction Script for Non-Defective Product:
+    - Run the prediction script on a different image to identify a non-defective product:
+  
+      python3 prediction_script.py --input_image_file /path/to/IMG_07703.png --port 8602 --output_result_file Non-defective_result_file
+
+2. Check the Results:
+    - Ensure the result file does not contain `scratch` or `dent`.
+
+Congratulations!
+Over the course of this challenge lab you have demonstrated your knowledge of working with Visual Inspection AI. You have successfully deployed the exported Cosmetic Inspection anomaly detection solution artifact and tested it by identifying both defective and non-defective mobile phones.
