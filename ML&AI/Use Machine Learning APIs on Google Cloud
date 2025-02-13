@@ -1,0 +1,138 @@
+Challenge scenario
+You have started a new role as a member of the Analytics team for Jooli Inc. You are expected to help with the development and assessment of data sets for your company's Machine Learning projects. Common tasks include preparing, cleaning, and analyzing diverse data sets.
+
+You are expected to have the skills and knowledge for these tasks, so don't expect step-by-step guides to be provided.
+
+Your challenge
+You have been asked to develop a process to analyze sets of images of signage to extract and translate any text in the images. This extracted text information will be used to help classify the images as part of a machine learning project that will use this image dataset for model training and evaluation. The images all contain text, but the text may be in any language. The images are stored in a Cloud Storage bucket that has been provided for you.
+
+You must use a Python script to process each of the image files by sending them to the Google Vision API to identify the text in the image. The text from each image must be saved back to files on Cloud Storage, with a separate file for the text from each image. If the text locale is not language (locale='locale'), you must then send the text to the Google Translate API to get the language translation for the original text. Once all of the images have been processed, the script must upload the results to a BigQuery table.
+
+This diagram outlines the process. Machine learning APIs challenge diagram
+
+The processed text data must then be written out to a pre-existing BigQuery table called image_text_detail in a dataset in your project called image_classification_dataset.
+
+A colleague on your team had started to work on the code to process the images based on a Python script previously used to process a set of text files using the Natural Language API. Your colleague has been moved to a separate project and you must now complete the task.
+
+Most of the work on the script has been completed and the version you have been given will access a storage bucket, and iterate over every image file it finds. However the specific API calls that need to be made to find the text in each image and then send that text to the Translation API have not yet been implemented.
+
+You have been given a copy of the work in progress Python script and a set of sample images in a Cloud Storage bucket that is named after your lab Project ID.
+
+Your colleague identified the unfinished parts of the script and commented on the API calls that need to be made. There are three unfinished parts in the script that you must complete to make the correct Machine Learning API calls. All of them are preceded with a comment using the label # TBD:.
+
+The final line of code uploads the result data to BigQuery. In the script, this line is disabled by a comment character. When you are satisfied that the rest of the script is working, remove the comment character to enable the final line.
+
+Before you work on the script, you must prepare your environment by creating a service account with the correct permissions and download the credential file for that account. Once you have the service account credentials, you can modify the Python script and use it to process the image files.
+
+To complete the challenge, the original extracted text, locale, and translated text data for all of the images must be loaded into the BigQuery table called image_text_detail. The code to do this is in the script but you must remove the comment characters to enable the line of code at the end of the script.
+
+Once you have successfully processed the image files using the updated Python script and uploaded to data to BigQuery, you must confirm that image data has been successfully processed by running the following Query in BigQuery:
+
+SELECT locale,COUNT(locale) as lcount FROM image_classification_dataset.image_text_detail GROUP BY locale ORDER BY lcount DESC
+This query will report the number of signs of each language type it has found in the set of sample images.
+
+Task 1: Configure a Service Account
+1. Create a new service account:
+
+gcloud iam service-accounts create my-service-account \
+    --description="Service account for accessing ML APIs, BigQuery, and Cloud Storage" \
+    --display-name="My Service Account"
+
+2. Bind BigQuery and Cloud Storage Roles to the Service Account:
+
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+    --member="serviceAccount:my-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/bigquery.admin"
+
+gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+    --member="serviceAccount:my-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/storage.admin"
+
+3. Check the Service Account's Permissions:
+gcloud projects get-iam-policy YOUR_PROJECT_ID \
+    --flatten="bindings[].members" \
+    --format="table(bindings.role)" \
+    --filter="bindings.members:my-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com"
+
+Task 2: Create and Download a Credential File
+1. Download the IAM Credentials JSON File:
+
+gcloud iam service-accounts keys create ~/key-file.json \
+    --iam-account=my-service-account@YOUR_PROJECT_ID.iam.gserviceaccount.com
+
+2. Set the Environment Variable:
+
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/key-file.json"
+
+3. Check the IAM Credential File:
+
+ls /path/to/key-file.json
+
+
+Task 3: Modify the Python Script
+1. Copy the file analyze-images-v2.py:
+
+gsutil cp gs://YOUR_BUCKET_NAME/analyze-images-v2.py ~/analyze-images-v2.py
+
+2. Modify the Script:
+   - Access the Cloud Vision API to extract text.
+   - Save text data to a text file in the same bucket.
+
+# Add the following code where indicated by # TBD
+
+from google.cloud import vision
+from google.cloud.vision import types
+
+def extract_text_from_image(image_uri):
+    client = vision.ImageAnnotatorClient()
+    image = vision.types.Image()
+    image.source.image_uri = image_uri
+
+    response = client.text_detection(image=image)
+    texts = response.text_annotations
+
+    return texts[0].description if texts else ""
+
+3. Run the partially completed script to check progress:
+
+python analyze-images-v2.py
+
+
+Task 4: Translate the Text
+1. Modify the Script to Use the Translation API:
+   - Identify language and translate text.
+
+# Add the following code where indicated by # TBD
+
+from google.cloud import translate_v2 as translate
+
+def translate_text(text, target_language="en"):
+    translate_client = translate.Client()
+    result = translate_client.translate(text, target_language=target_language)
+    return result["translatedText"]
+
+2. Run the script to check progress:
+
+python analyze-images-v2.py
+
+
+Task 5: Identify the Most Common Language
+1. Remove Comment from Upload Line:
+   - Ensure your script uploads data to BigQuery.
+
+2.Run BigQuery Query:
+
+SELECT detected_language, COUNT(*) as language_count
+FROM `YOUR_PROJECT_ID.YOUR_DATASET.YOUR_TABLE`
+GROUP BY detected_language
+ORDER BY language_count DESC;
+
+
+Tip 1: You must set an environment variable to provide the details of the credentials file that should be used by the Python script to access the Google Cloud APIs.
+
+Tip 2: You can find details about the Vision API Client document_text_detection API call in the Python API Documentation reference page for the Vision API Client and the details of the Vision API annotation response object in the Python API Documentation reference page for the Vision API Objects.
+
+Tip 3: For details about the Translation API Client translate API call, see the Python API Documentation for the Translation V2 API Client.
+
+Congratulations!
+You have developed a process to analyze images of signage and extract and translate the text in the images
