@@ -1,0 +1,52 @@
+Challenge scenario
+You were recently hired as a Machine Learning Engineer at a startup movie review website. Your manager has tasked you with building a machine learning model to classify the sentiment of user movie reviews as positive or negative. These predictions will be used as an input in downstream movie rating systems and to surface top supportive and critical reviews on the movie website application.
+
+The challenge: your business requirements are that you have just 6 weeks to productionize a model that achieves great than 75% accuracy to improve upon an existing bootstrapped solution. Furthermore, after doing some exploratory analysis in your startup's data warehouse, you found that you only have a small dataset of 50k text reviews to build a higher performing solution.
+
+Your challenge
+To build and deploy a high performance machine learning model with limited data quickly, you will walk through training and deploying a custom TensorFlow BERT sentiment classifier for online predictions on Google Cloud's Vertex AI platform. Vertex AI is Google Cloud's next generation machine learning development platform where you can leverage the latest ML pre-built components and AutoML to significantly enhance your development productivity, the ability to scale your workflow and decision making with your data, and accelerate time to value.
+
+Lab architecture diagram
+
+First, you will progress through a typical experimentation workflow where you will build your model from pre-trained BERT components from TF-Hub and tf.keras classification layers to train and evaluate your model in a Vertex Notebook. You will then package your model code into a Docker container to train on Google Cloud's Vertex AI. Lastly, you will define and run a Kubeflow Pipeline on Vertex Pipelines that trains and deploys your model to a Vertex Endpoint that you will query for online predictions.
+
+Task 1: Open the notebook in Vertex AI Workbench
+1. Go to the Google Cloud console.
+2. On the Navigation menu, click "Vertex AI > Workbench".
+3. Find the name of your Workbench instance and click the "Open JupyterLab" button.
+4. The JupyterLab interface for your Workbench instance will open in a new browser tab.
+
+#Task 2: Set up the notebook
+1. In your notebook, open the "Terminal".
+2. Install the required packages:
+
+   pip3 install -U -r requirements.txt --user
+
+3. In the File Browser on the left, click on the notebook name file.
+4. When asked which kernel to use, select the "Python 3 (ipykernel) kernel".
+5. Run through the Setup section of the notebook to install the required libraries and set up your environment.
+6. Use your **Project ID** for the Project ID and **Region** for the Region.
+
+Task 3: Build and train your model locally in a Vertex notebook
+1. Fill out the `#TODO` sections in your notebook for adding a `hub.KerasLayer` for BERT text preprocessing and encoding.
+2. Save your BERT sentiment classifier locally to the `./bert-sentiment-classifier-local` directory.
+
+Task 4: Use Cloud Build to build and submit your model container to Artifact Registry
+1. Fill out the `#TODO` section to create a Docker Artifact Registry using the `gcloud` CLI:
+
+   gcloud artifacts repositories create [YOUR_REPOSITORY_NAME] --repository-format=docker --location=[YOUR_REGION] --description="Repository for custom container images"
+ 
+2. Build and submit your container image to Artifact Registry using Cloud Build:
+
+   gcloud builds submit --config={MODEL_DIR}/cloudbuild.yaml .
+
+Task 5: Define a pipeline using the KFP SDK
+1. Fill out the `#TODO` section to add and configure `CustomContainerTrainingJobOp` components for your pipeline.
+2. Note that the training can take around 30-40 minutes to train and deploy the model.
+
+Task 6: Query the deployed model using your Vertex endpoint
+1. Fill out the `#TODO` section to generate online predictions using your Vertex Endpoint.
+
+
+Congratulations!
+Congratulations! In this lab, you have learned how to build and deploy a custom BERT sentiment classifier using Vertex AI. You have also learned how to use Cloud Build to build and submit your custom model container to Artifact Registry, and how to define a pipeline using the KFP SDK. You are now ready to build and deploy your own custom models using Vertex AI.
